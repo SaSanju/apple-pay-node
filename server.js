@@ -1,12 +1,7 @@
 var request = require('request');
 var express = require('express');
-// var x509 = require('x509');
+require('dotenv').config();
 var fs = require('fs');
-
-var CERT_PATH = './apple-pay-cert.pem';
-
-var cert = fs.readFileSync(CERT_PATH, 'utf8');
-var merchantIdentifier = extractMerchantID(cert);
 
 var app = express();
 
@@ -16,45 +11,24 @@ app.use(function(req, res, next) {
   next();
 });
 
-/* using p12 file */
-
-var options = {
-  url: 'https://some-url/api',
-  headers: {
-      "content-type": "application/json",
-  },
-  agentOptions: {
-      pfx: fs.readFileSync(__dirname + '/certs/myCert.p12'),
-      passphrase: '1234'
-  }
-};
-
-request.get(options, (error, response, body) => {
-  console.log(error);
-  console.log(response);
-  console.log(body);
-});
-
-/* end p12 file */
-
 app.get('/merchant-session/new', function(req, res) {
   var uri = req.query.validationURL || 'https://apple-pay-gateway-cert.apple.com/paymentservices/startSession';
 
   var options = {
     uri: uri,
     json: {
-      merchantIdentifier: merchantIdentifier,
+      merchantIdentifier: process.env.APPLE_PAY_MERCHANT_IDENTIFIER,
       domainName: process.env.APPLE_PAY_DOMAIN,
       displayName: process.env.APPLE_PAY_DISPLAY_NAME
     },
-
     agentOptions: {
-      cert: cert,
-      key: cert
+        pfx: fs.readFileSync(__dirname + '/apple-pay-node/ApplePay_merchant_id.p12'),
+        passphrase: process.env.APPLE_PAY_CERT_PASSWORD
     }
   };
 
   request.post(options, function(error, response, body) {
+    // console.log(response)
     if (body) {
       // Apple returns a payload with `displayName`, but passing this
       // to `completeMerchantValidation` causes it to error.
@@ -69,14 +43,3 @@ var server = app.listen(process.env.PORT || 3000, function() {
   console.log('Apple Pay server running on ' + server.address().port);
   console.log('GET /merchant-session/new to retrieve a merchant session');
 });
-
-function extractMerchantID(cert) {
-  return "apple-identifier"
-  // try {
-  //   var info = x509.parseCert(cert);
-  //   console.log(info);
-  //   return info.extensions['1.2.840.113635.100.6.32'].substr(2);
-  // } catch (e) {
-  //   console.error("Unable to extract merchant ID from certificate " + CERT_PATH);
-  // }
-}
