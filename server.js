@@ -35,7 +35,7 @@ app.get('/merchant-session/new', function(req, res) {
       delete body.displayName;
     }
 
-    res.send(response);
+    res.send(body);
   });
 });
 
