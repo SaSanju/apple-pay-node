@@ -28,11 +28,9 @@ app.get('/merchant-session/new', function(req, res) {
   };
 
   request.post(options, function(error, response, body) {
-    // console.log(response)
-    if (body) {
-      // Apple returns a payload with `displayName`, but passing this
-      // to `completeMerchantValidation` causes it to error.
-      delete body.displayName;
+    
+    if(error){
+      throw new Error("Error in create Apple Pay Session.")
     }
 
     res.send(body);
