@@ -5,6 +5,8 @@ var moment = require('moment');
 require('dotenv').config();
 var fs = require('fs');
 var PreAuthJSON = require('./PreAuthJSON');
+var PostAuthJSON = require('./postAuthJSON');
+
 
 var app = express();
 
@@ -88,8 +90,18 @@ app.post('/auth/getsessiontoken', function (req, res) {
     // res.send(body)
     console.log(body.GetSessionTokenResponse.ECOMMInfo.OneTimeToken)
 
-    preAuthFunc(body, (data) => {
-      res.send(data);
+    preAuthFunc(body, (preData) => {
+      postAuthFunc(preData.preAuthRes, (postData)=> {
+        var resData = {
+          "sessionReq":options.json,
+          "sessionRes":body,
+          "preAuthReq":preData.preAuthReq,
+          "preAuthRes":preData.preAuthRes,
+          "postAuthReq":postData.postAuthReq,
+          "postAuthRes":postData.postAuthRes
+        }
+        res.send(resData);
+      })
     });
   });
 });
@@ -121,7 +133,41 @@ var preAuthFunc = (reqData, next) => {
       throw new Error("Error in authenticate OTT from Aurus Pay Session.")
     }
     // console.log(body)
-    next(body);
+    
+    next({
+      "preAuthReq": preAuthReqObj,
+      "preAuthRes": body
+    });
+  });
+
+}
+
+var postAuthFunc = (reqData, next) => {
+  var uri = `${process.env.AURUS_PAY_DOMAIN_NAME}/authtransaction`;
+  var postAuthReqObj = PostAuthJSON;
+  postAuthReqObj.TransRequest.TransactionTime = moment().format('hhmmss');
+  postAuthReqObj.TransRequest.OrigAurusPayTicketNum = reqData.TransResponse.AurusPayTicketNum;
+  postAuthReqObj.TransRequest.OrigTransactionIdentifier = reqData.TransResponse.TransDetailsData.TransDetailData.TransactionIdentifier;
+  postAuthReqObj.TransRequest.ECOMMInfo = reqData.TransResponse.TransDetailsData.TransDetailData.ECOMMInfo;
+
+
+  var options = {
+    uri: uri,
+    json: postAuthReqObj
+  }
+
+  request.post(options, function (error, response, body) {
+
+    if (error) {
+      console.log(error)
+      throw new Error("Error in Post authenticate from Aurus Pay Session.")
+    }
+    // console.log(body)
+    
+    next({
+      "postAuthReq": postAuthReqObj,
+      "postAuthRes": body
+    });
   });
 
 }

@@ -1,14 +1,12 @@
-require('dotenv').config();
-
-var preAuthJson = {
+const postAuth = {
     "TransRequest": {
-        "CorpID": process.env.AURUS_PAY_CORP_ID,
         "PONumber": "",
         "ClerkID": "",
-        "TransactionType": "04",
-        "OrigAurusPayTicketNum": "",
+        "CorpID": "4319",
+        "TransactionType": "05",
+        "OrigAurusPayTicketNum": "120048006783550845",
         "ProcessingMode": "",
-        "PostAuthSequenceNo": "00",
+        "PostAuthSequenceNo": "01",
         "ProcessorToken": "",
         "Level3ProductsData": {
             "Level3Products": {
@@ -50,27 +48,27 @@ var preAuthJson = {
             "BillingState": "mh"
         },
         "CurrencyCode": "840",
-        "PostAuthCount": "",
+        "PostAuthCount": "01",
         "CardType": "",
-        "OrigTransactionIdentifier": "",
+        "OrigTransactionIdentifier": "191200480067835447",
         "CardExpiryDate": "",
         "InvoiceNumber": "12345787",
         "KI": "",
-        "TransactionDate": "02132020",
+        "TransactionDate": "02142020",
         "KeyedEntryAVSFlag": "N",
         "SubTransType": "",
         "ReferenceNumber": "",
         "ECOMMInfo": {
             "OneTimeToken": "",
-            "StoreId": "",
+            "StoreId": "900003",
+            "MerchantIdentifier": "100000036376",
+            "TerminalId": "74527567",
             "CardIdentifier": "",
-            "MerchantIdentifier": "",
-            "OneOrderToken": "",
-            "TerminalId": ""
+            "OneOrderToken": "20000000000003433805"
         },
         "ApprovalCode": "",
         "PODate": "",
-        "TransactionTime": "130214",
+        "TransactionTime": "042402",
         "SettlementInfo": {
             "TransactionDescription": "",
             "PromotionCode": "",
@@ -212,4 +210,4 @@ var preAuthJson = {
     }
 }
 
-module.exports = preAuthJson;
+module.exports = postAuth ;
